@@ -4,7 +4,7 @@
 #include <Adafruit_MAX31856.h>
 #include <LiquidCrystal.h>
 
-LiquidCrystal lcd(45, 44, 25, 24, 23, 22);
+LiquidCrystal lcd(12, 11, 6, 5, 4, 3);
 
 // Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31856 max = Adafruit_MAX31856(7, 8, 9, 10); //initializes Thermocouple pins
@@ -40,7 +40,7 @@ void setup() {
   max.begin();
   max.setThermocoupleType(MAX31856_TCTYPE_K);
   Serial.print("Thermocouple type: ");
-  switch ( max.getThermocoupleType() ) {
+  switch (max.getThermocoupleType() ) {
     case MAX31856_TCTYPE_B: lcd.print("B Type"); break;
     case MAX31856_TCTYPE_E: Serial.println("E Type"); break;
     case MAX31856_TCTYPE_J: Serial.println("J Type"); break;
@@ -61,7 +61,7 @@ void setup() {
   Serial.println(" card initialized.");
   
 //RPM SENSOR
-  attachInterrupt(1, rev, RISING);
+  attachInterrupt(digitalPinToInterrupt(2), rev, RISING);
   startTime = millis();
   
   lcd.print(", SD Card Initialized");
@@ -93,10 +93,10 @@ void setup() {
 
 void loop() {
 //  switchState = digitalRead(newFileSwitch);
-//  while (switchState == HIGH){
 //    incrFileName = incrFileName + 1;
 //    digitalWrite(LED,HIGH); //turns LED on
 //    if (switchState == LOW){
+//  while (switchState == HIGH){
 //      break;
 //    }
 //  }
