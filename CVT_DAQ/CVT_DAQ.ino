@@ -1,4 +1,4 @@
-#include <TimeLib.h>
+//#include <TimeLib.h>
 #include <SPI.h>
 #include <SD.h>
 #include <Adafruit_MAX31856.h>
@@ -12,8 +12,8 @@ Adafruit_MAX31856 max = Adafruit_MAX31856(7, 8, 9, 10); //initializes Thermocoup
 const int chipSelect = 4;
 
 int switchState = 0; //initialize switch value
-int newFileSwitch = 6; //pin the switch is connected to
-int LED = 2; //pin the LED is in
+//int newFileSwitch = 6; //pin the switch is connected to
+//int LED = 2; //pin the LED is in
 int incrFileName = 0; //adds 1 to the SD CARD file name
 int rpmUpdates = 0; //The number of times that rpm was updated on the screen
 
@@ -29,8 +29,8 @@ volatile float revs;
 void setup() {
     //Initialize Pins
     pinMode(pin,INPUT);
-    pinMode(LED,OUTPUT); // LED
-    pinMode(newFileSwitch,INPUT); // Switch state
+    //pinMode(LED,OUTPUT); // LED
+   //pinMode(newFileSwitch,INPUT); // Switch state
     
     lcd.begin(16, 2);// set up the LCD's number of columns and rows:
     
@@ -41,10 +41,10 @@ void setup() {
     max.setThermocoupleType(MAX31856_TCTYPE_K);
     Serial.print("Thermocouple type: ");
     switch (max.getThermocoupleType() ) {
-        case MAX31856_TCTYPE_B: lcd.print("B Type"); break;
+        case MAX31856_TCTYPE_B: Serial.println("B Type"); break;
         case MAX31856_TCTYPE_E: Serial.println("E Type"); break;
         case MAX31856_TCTYPE_J: Serial.println("J Type"); break;
-        case MAX31856_TCTYPE_K: lcd.print("K Type"); break;
+        case MAX31856_TCTYPE_K: Serial.println("K Type"); break;
         case MAX31856_TCTYPE_N: Serial.println("N Type"); break;
         case MAX31856_TCTYPE_R: Serial.println("R Type"); break;
         case MAX31856_TCTYPE_S: Serial.println("S Type"); break;
@@ -52,19 +52,28 @@ void setup() {
         case MAX31856_VMODE_G8: Serial.println("Voltage x8 Gain mode"); break;
         case MAX31856_VMODE_G32: Serial.println("Voltage x8 Gain mode"); break;
         default: Serial.println("Unknown"); break;}
+
     
     //SD CARD
     Serial.print("Initializing SD card.....");
-    if(!SD.begin(chipSelect)){
-        Serial.println("Card failed, or not present");
-        return;}
-    Serial.println(" card initialized.");
     
+/*    if(!SD.begin(chipSelect)){
+        Serial.println("Card failed, or not present");
+        //return;
+        }
+    Serial.println(" card initialized.");
+  */  
     //RPM SENSOR
     attachInterrupt(digitalPinToInterrupt(2), rev, RISING);
+    lcd.print("Hello World");
+    delay(2000);
+    lcd.clear();
     startTime = millis();
+
+    Serial.println("Passed interrupt");
     
     lcd.print(", SD Card Initialized");
+    Serial.println("Should have outputted to lcd");
     lcd.setCursor(0,1);
     lcd.print("Get Dirty MotherFucker");
     delay(1500);
@@ -87,6 +96,7 @@ void setup() {
     lcd.print("Systems ARE A GO");
     delay(3000);
     lcd.clear();
+    Serial.println("Reached end of setup()");
 }
 
 
@@ -101,14 +111,14 @@ void loop() {
     //    }
     //  }
     
-    //Serial.println(revs);
+    Serial.println(revs);
     
     if (revs>10){//Calculates RPM
         totalTime= millis()- startTime;
         rpm = 60000.00*(revs/totalTime);
         lcd.setCursor(0,0);
         lcd.print("RPM: ");
-        Serial.println(rpm);
+        //Serial.println(rpm);
         lcd.print(rpm);
         rpmUpdates++;
         startTime = millis();
@@ -119,7 +129,7 @@ void loop() {
         TempLog();
         rpmUpdates = 0;
     }
-    digitalWrite(LED,LOW);
+    //digitalWrite(LED,LOW);
 }
 
 //Counts the amount of revolutions using the interrupt function declared in the setup() loop
@@ -176,5 +186,5 @@ void TempLog(){
         Serial.println("error opening datalog.txt");
     }
     
-    digitalWrite(LED,LOW); //turns LED off
+    //digitalWrite(LED,LOW); //turns LED off
 }
