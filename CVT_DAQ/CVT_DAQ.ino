@@ -4,7 +4,7 @@
 #include <Adafruit_MAX31856.h>
 #include <LiquidCrystal.h>
 
-LiquidCrystal lcd(A5, A4, 6, 5, 4, 3);
+LiquidCrystal lcd(A5, A4, 6, 5, A3, 3);
 
 // Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31856 max = Adafruit_MAX31856(7, 8, 9, 10); //initializes Thermocouple pins
@@ -57,23 +57,19 @@ void setup() {
     //SD CARD
     Serial.print("Initializing SD card.....");
     
-/*    if(!SD.begin(chipSelect)){
+    if(!SD.begin(chipSelect)){
         Serial.println("Card failed, or not present");
-        //return;
-        }
-    Serial.println(" card initialized.");
-  */  
+        return;
+    }
+    Serial.println("Card initialized.");
+ 
+    
     //RPM SENSOR
     attachInterrupt(digitalPinToInterrupt(2), rev, RISING);
-    lcd.print("Hello World");
-    delay(2000);
-    lcd.clear();
     startTime = millis();
 
-    Serial.println("Passed interrupt");
     
-    lcd.print(", SD Card Initialized");
-    Serial.println("Should have outputted to lcd");
+    lcd.print("SD Card Initialized");
     lcd.setCursor(0,1);
     lcd.print("Get Dirty MotherFucker");
     delay(1500);
@@ -81,20 +77,20 @@ void setup() {
         // scroll one position left:
         lcd.scrollDisplayLeft();
         // wait a bit:
-        delay(500);
+        delay(300);
     }
     for (int positionCounter = 0; positionCounter < 13; positionCounter++) {
         // scroll one position left:
         lcd.scrollDisplayRight();
         // wait a bit:
-        delay(500);
+        delay(300);
     }
     
-    delay(5000);
+    delay(1500);
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Systems ARE A GO");
-    delay(3000);
+    delay(1500);
     lcd.clear();
     Serial.println("Reached end of setup()");
 }
@@ -145,7 +141,7 @@ String NewName(){
 //Logs the current temperature to the SD card
 void TempLog(){
     Serial.print("FileName: ");
-    Serial.println(incrFileName);
+    //Serial.println(incrFileName);
     
     fileName = "DataLog" + String(incrFileName); //add current count to the filename
     
@@ -179,7 +175,7 @@ void TempLog(){
         dataFile.println(dataString);
         dataFile.close();
         // print to the serial port too:
-        Serial.println(dataString);
+        //Serial.println(dataString);
     }
     //If the file isn't open, pop up an error:
     else {
