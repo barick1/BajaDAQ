@@ -4,7 +4,7 @@
 #include <Adafruit_MAX31856.h>
 #include <LiquidCrystal.h>
 
-LiquidCrystal lcd(12, 11, 6, 5, 4, 3);
+LiquidCrystal lcd(A5, A4, 6, 5, 4, 3);
 
 // Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31856 max = Adafruit_MAX31856(7, 8, 9, 10); //initializes Thermocouple pins
