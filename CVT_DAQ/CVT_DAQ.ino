@@ -4,7 +4,7 @@
 #include <Adafruit_MAX31856.h>
 #include <LiquidCrystal.h>
 
-LiquidCrystal lcd(A5, A4, 6, 5, A3, 3);
+LiquidCrystal lcd(A5, A4, A3, 5, A2, 3); //CHANGED LCD PINS
 
 // Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31856 max = Adafruit_MAX31856(7, 8, 9, 10); //initializes Thermocouple pins
@@ -12,14 +12,13 @@ Adafruit_MAX31856 max = Adafruit_MAX31856(7, 8, 9, 10); //initializes Thermocoup
 const int chipSelect = 4;
 
 int switchState = 0; //initialize switch value
-//int newFileSwitch = 6; //pin the switch is connected to
+int newFileSwitch = 6; //pin the switch is connected to
 //int LED = 2; //pin the LED is in
 int incrFileName = 0; //adds 1 to the SD CARD file name
 int rpmUpdates = 0; //The number of times that rpm was updated on the screen
 
 String fileName = "DataLog"; //name of the SD card txt file
 String currentName;
-
 int pin=20;
 int magnet;
 float rpm;
@@ -31,9 +30,7 @@ void setup() {
     pinMode(pin,INPUT);
     //pinMode(LED,OUTPUT); // LED
    //pinMode(newFileSwitch,INPUT); // Switch state
-    
     lcd.begin(16, 2);// set up the LCD's number of columns and rows:
-    
     Serial.begin(9600);//Setup the Serial Communication
     
     //THERMOCOUPLE
@@ -62,31 +59,29 @@ void setup() {
         return;
     }
     Serial.println("Card initialized.");
- 
     
+    //update
+
+    File version = SD.open("version.txt", FILE_READ);
+    incrFileName = version.read();
+    incrFileName++;
+    version.close();
+    SD.remove("version.txt");
+    File Update = SD.open("version.txt", FILE_WRITE);
+    Update.write(incrFileName);
+    Update.close();
+
+    
+
     //RPM SENSOR
     attachInterrupt(digitalPinToInterrupt(2), rev, RISING);
     startTime = millis();
 
     
-    lcd.print("SD Card Initialized");
+    lcd.print("Get Dirty");
     lcd.setCursor(0,1);
-    lcd.print("Get Dirty MotherFucker");
-    delay(1500);
-    for (int positionCounter = 0; positionCounter < 13; positionCounter++) {
-        // scroll one position left:
-        lcd.scrollDisplayLeft();
-        // wait a bit:
-        delay(300);
-    }
-    for (int positionCounter = 0; positionCounter < 13; positionCounter++) {
-        // scroll one position left:
-        lcd.scrollDisplayRight();
-        // wait a bit:
-        delay(300);
-    }
-    
-    delay(1500);
+    lcd.print("MotherFucker");
+    delay(5000);
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Systems ARE A GO");
@@ -98,14 +93,16 @@ void setup() {
 
 
 void loop() {
-    //  switchState = digitalRead(newFileSwitch);
-    //    incrFileName = incrFileName + 1;
-    //    digitalWrite(LED,HIGH); //turns LED on
-    //    if (switchState == LOW){
-    //  while (switchState == HIGH){
-    //      break;
-    //    }
-    //  }
+    //update
+    switchState = digitalRead(newFileSwitch);
+    if (switchState == HIGH){
+        incrFileName = incrFileName + 1;
+        SD.remove("version.txt");
+        File Update = SD.open("version.txt", FILE_WRITE);
+        Update.write(incrFileName);
+        Update.close();
+
+    }
     
     Serial.println(revs);
     
