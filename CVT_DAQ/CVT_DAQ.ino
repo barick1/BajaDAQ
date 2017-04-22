@@ -4,21 +4,22 @@
 #include <Adafruit_MAX31856.h>
 #include <LiquidCrystal.h>
 
-LiquidCrystal lcd(A5, A4, A3, 5, A2, 3); //CHANGED LCD PINS
+LiquidCrystal lcd(A5, A4, A3, A2, 5, 3); //CHANGED LCD PINS
 
 // Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31856 max = Adafruit_MAX31856(7, 8, 9, 10); //initializes Thermocouple pins
 
 const int chipSelect = 4;
 
-int switchState = 0; //initialize switch value
-int newFileSwitch = 6; //pin the switch is connected to
+//int switchState = 0; //initialize switch value
+//int newFileSwitch = 6; //pin the switch is connected to
 //int LED = 2; //pin the LED is in
 int incrFileName = 0; //adds 1 to the SD CARD file name
 int rpmUpdates = 0; //The number of times that rpm was updated on the screen
 
-String fileName = "DataLog"; //name of the SD card txt file
-String currentName;
+String fileName = "datalog.txt"; //name of the SD card txt file
+//String currentName;
+String testName = "test2.txt";
 int pin=20;
 int magnet;
 float rpm;
@@ -61,14 +62,18 @@ void setup() {
     Serial.println("Card initialized.");
     
     //update
-
-    File version = SD.open("version.txt", FILE_READ);
-    incrFileName = version.read();
+    String file_name = "version.txt";
+    File _version = SD.open(file_name, FILE_READ);
+    if (_version) {
+      Serial.println("Version file opened successfully");
+    }
+    incrFileName = _version.read();
     incrFileName++;
-    version.close();
-    SD.remove("version.txt");
+    _version.close();
+    SD.remove(file_name);
     File Update = SD.open("version.txt", FILE_WRITE);
-    Update.write(incrFileName);
+    char up_date = incrFileName;
+    Update.write(up_date);
     Update.close();
 
     
@@ -85,28 +90,34 @@ void setup() {
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("Systems ARE A GO");
+    lcd.setCursor(0,1);
+    lcd.print("Version " + String(incrFileName));
     delay(1500);
     lcd.clear();
     Serial.println("Reached end of setup()");
+    endTime = millis();
 }
-
 
 
 void loop() {
     //update
+    /*
     switchState = digitalRead(newFileSwitch);
     if (switchState == HIGH){
         incrFileName = incrFileName + 1;
         SD.remove("version.txt");
         File Update = SD.open("version.txt", FILE_WRITE);
-        Update.write(incrFileName);
+        char up_date = incrFileName;
+        Update.write(up_date);
         Update.close();
 
     }
-    
-    Serial.println(revs);
-    
-    if (revs>10){//Calculates RPM
+    */
+    //Serial.println(revs);
+
+    //Calculates RPM
+    if (revs>10 /*millis() % 1000 < 10*/){
+        lcd.clear();
         totalTime= millis()- startTime;
         rpm = 60000.00*(revs/totalTime);
         lcd.setCursor(0,0);
@@ -116,6 +127,14 @@ void loop() {
         rpmUpdates++;
         startTime = millis();
         revs = 0;
+
+        // UPDATING ELAPSED TIME
+        lcd.setCursor(9,1);
+        long totalSec = (millis()-endTime) / 1000;
+        int hour = totalSec / 3600;
+        int minute = (totalSec % 3600) / 60;
+        int second = (totalSec % 3600) % 60;
+        lcd.print(String(hour) + "h" + String(minute) + "m" + String(second) + "s");
     }
     
     if (rpmUpdates > 1){//Calls function to log temperature value to SD CARD
@@ -130,9 +149,9 @@ void rev(){
     revs++;
 }
 
-String NewName(){
-    currentName = "DataLog" + String(incrFileName);
-    return currentName;
+void updateFileName(){
+    String tmp = "DataLog" + String(incrFileName) + ".txt";
+    fileName = tmp.c_str();
 }
 
 //Logs the current temperature to the SD card
@@ -140,7 +159,7 @@ void TempLog(){
     Serial.print("FileName: ");
     //Serial.println(incrFileName);
     
-    fileName = "DataLog" + String(incrFileName); //add current count to the filename
+    //String fileName = NewName(); //add current count to the filename
     
     float temperature = max.readThermocoupleTemperature(); //Saves temperature to variable
     uint8_t fault = max.readFault();
@@ -155,29 +174,48 @@ void TempLog(){
         if (MAX31856_FAULT_OPEN)    Serial.println("Thermocouple Open Fault");
     }
     
-    String dataString = ""; //make a string for assembling the data log
+    String dataString; //make a string for assembling the data log
     
-    dataString += String(millis());
+    dataString += String(millis()-endTime);
     dataString += ",";
     dataString += temperature; //concatenate to SD string
+    dataString += "," + String(rpm);
     
     lcd.setCursor(0,1);
     lcd.print(String(temperature) + " C");
-    
+    /*
     //Open the file. note that only one file can be open at a time,so you have to close this one before opening another.
-    File dataFile = SD.open(fileName + ".txt", FILE_WRITE);
-    
+    fileName = String(incrFileName) + ".txt";
+    char * temp = fileName.c_str();
+    //updateFileName();
+    File dataFile = SD.open("test.txt", FILE_WRITE);
+    dataFile.println("TEST\n");
     //If the file is available, write to it:
     if (dataFile) {
         dataFile.println(dataString);
+        Serial.println("Data Written to File");
         dataFile.close();
         // print to the serial port too:
         //Serial.println(dataString);
     }
     //If the file isn't open, pop up an error:
     else {
-        Serial.println("error opening datalog.txt");
+        Serial.println("error opening datalog.txt, inrcFileName=" + String(incrFileName));
+        Serial.println("filename = " + String(fileName));
     }
     
     //digitalWrite(LED,LOW); //turns LED off
+}*/
+  String test = String(incrFileName) + ".txt";
+  File dataFile = SD.open(test, FILE_WRITE);
+  if (dataFile) {
+    dataFile.println(dataString);
+    dataFile.close();
+    // print to the serial port too:
+    Serial.println(dataString);
+  }
+  // if the file isn't open, pop up an error:
+  else {
+    Serial.println("error opening datalog.txt");
+  }
 }
